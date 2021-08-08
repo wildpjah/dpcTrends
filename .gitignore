@@ -1,5 +1,5 @@
 /.vscode
 /fcgid-bin
 /.gitignore
-/DotaDBInsertScript
-/dbconfig.php
+dbconfig.php
+DotaDBInsertScript.py
