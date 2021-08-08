@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DotaBase</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <script src="dom.js"></script>
+    <script src="chart.js"></script>
+</head>
+
+<body>
+
+    <h1>Match Trends</h1>
+
+    <form autocomplete="off" id='graphOptions'>
+        <label for='dataType'>Data Type:</label>
+        <select name='dataType' id='dataType'>
+            <option value='matchData'>Match Trends</option>
+            <option value='Players'>Players</option>
+            <option value='Heroes'>Heroes</option>
+            <option value='Teams'>Teams</option>
+            <option value='faction'>Faction</option>
+        </select>
+
+        <label id='trackedObjectLabel' for="trackedObject">Tracked Object:</label>
+        <input id="trackedObject" type="text" name='trackedObject'>
+
+        <div id='factionDiv'>
+            <label id='factionLabel'>Faction:</label>
+            <input type='radio' name='factionButtons' id='radiantButton' value='radiant'>
+            <label id='radiantLabel' for='radiantButton'>Radiant</label>
+            <input type='radio' name='factionButtons' id='direButton' value='dire'>
+            <label id='direLabel' for='direButton'>Dire</label>
+        </div>
+
+        <label for="trackedStat">Tracked Statistic:</label>
+        <select name="trackedStat" id="trackedStat">
+            <option class='factionStat gameStat' value='duration'>Game Duration</option>
+            <option class='playerStat factionStat' value='winrate'>Winrate</option>
+            <option class='playerStat' value='kills'>Kills</option>
+            <option class='playerStat' value='Deaths'>Deaths</option>
+            <option class='playerStat' value='assists'>Assists</option>
+            <option class='playerStat' value='gpm'>GPM</option>
+            <option class='playerStat' value='xpm'>XPM</option>
+            <option class='playerStat' value='Denies'>Denies</option>
+            <option class='playerStat' value='buildingDamage'>Building Damage</option>
+            <option class='playerStat' value='heroDamage'>Hero Damage</option>
+            <option class='playerStat' value='heroHealing'>Healing</option>
+            <option class='playerStat' value='endGameGold'>End Game Gold</option>
+            <option class='playerStat' value='goldSpent'>Gold Spent</option>
+            <option class='playerStat' value='level'>End Game Level</option>
+            <option class='factionStat gameStat' value='kills'>Total Kills</option>
+            <option class='factionStat' value='Deaths'>Total Deaths</option>
+            <option class='factionStat gameStat' value='gpm'>Total GPM</option>
+            <option class='factionStat gameStat' value='xpm'>Total XPM</option>
+            <option class='factionStat gameStat' value='heroDamage'>Total Hero Damage</option>
+            <option class='factionStat gameStat' value='buildingDamage'>Total Building Damage</option>
+
+        </select>
+
+
+        <label for="dataFormat">Data Format:</label>
+        <select name='dataFormat' id='dataFormat'>
+            <option id='avg' value="avg">Average</option>
+            <!--
+        These options still being worked on
+      <option id='movingAvg' value="movingAvg">Moving Average</option>
+      <option id='raw' value='raw'>Raw Data</option>
+    -->
+        </select>
+
+        <div class='dropdown'>
+            <p class='dropbtn'>Filters:</p>
+            <div id='filterDiv' class='dropdown-content'>
+                <label for='startDate'>Start Date(MM/DD/YYYY)</label>
+                <input type='text' id='startDate' name='startDate' , value=''>
+                <label for='endDate'>End Date(MM/DD/YYYY)</label>
+                <input type='text' id='endDate' name='endDate' , value=''>
+                <label for="patch">Patch:</label>
+                <input type="text" id="patch" name="patch">
+                <label for="team">Team:</label>
+                <input type="text" id="team" name="team">
+                <label for="withPlayer">With Player:</label>
+                <input type="text" id="withPlayer" name="withPlayer">
+                <label for="againstPlayer">Against Player:</label>
+                <input type="text" id="againstPlayer" name="againstPlayer">
+                <label for="withHero">With Hero:</label>
+                <input type="text" id="withHero" name="withHero">
+                <label for="againstHero">Against Hero:</label>
+                <input type="text" id="aginstHero" name="againstHero">
+
+                <div id='factionCheck'>
+                    <input type='hidden' name='radCheck' value='false'>
+                    <input type="checkbox" id="radCheck" name="radCheck" value="true" checked>
+                    <label for='radCheck'>Radiant</label>
+                    <input type='hidden' name='direCheck' value='false'>
+                    <input type="checkbox" id="direCheck" name="direCheck" value="true" checked>
+                    <label for='dire'>Dire</label>
+                </div>
+
+                <div id='winloss'>
+                    <input type='hidden' name='wins' value='false'>
+                    <input type="checkbox" id="wins" name="wins" value="true" checked>
+                    <label for='wins'>Wins</label>
+                    <input type='hidden' name='losses' value='false'>
+                    <input type="checkbox" id="losses" name="losses" value="true" checked>
+                    <label for='losses'>Losses</label>
+                </div>
+
+                <p>Regions:</p>
+                <input type='hidden' name='china' value='false'>
+                <input type="checkbox" id="china" name="china" value="true" checked>
+                <label for='china'>China</label>
+                <input type='hidden' name='weu' value='false'>
+                <input type="checkbox" id="weu" name="weu" value="true" checked>
+                <label for='weu'>Western Europe</label>
+                <input type='hidden' name='na' value='false'>
+                <input type="checkbox" id="na" name="na" value="true" checked>
+                <label for='na'>North America</label>
+                <input type='hidden' name='sa' value='false'>
+                <input type="checkbox" id="sa" name="sa" value="true" checked>
+                <label for='sa'>South America</label>
+                <input type='hidden' name='sea' value='false'>
+                <input type="checkbox" id="sea" name="sea" value="true" checked>
+                <label for='sea'>South East Asia</label>
+                <input type='hidden' name='eeu' value='false'>
+                <input type="checkbox" id="eeu" name="eeu" value="true" checked>
+                <label for='eeu'>Eastern Europe</label>
+            </div>
+        </div>
+        <br><br>
+        <input type="submit" value="Submit" id='submit'>
+    </form>
+
+
+    <div id="container" style="margin: 30; height: 600px; margin: 0 auto"></div>
+
+</body>
+
+</html>
