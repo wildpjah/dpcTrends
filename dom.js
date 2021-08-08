@@ -91,7 +91,7 @@ $(document).ready(function() {
                 dataType: "json",
                 data: {
                     q: request.term,
-                    value: 'Players',
+                    value: 'Heroes',
                 },
                 success: function(data) {
                     response(data);
