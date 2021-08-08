@@ -1,2 +1,5 @@
 /.vscode
 /fcgid-bin
+/.gitignore
+/DotaDBInsertScript
+/dbconfig.php
