@@ -19,22 +19,22 @@ function queueTotal($queue)
 }
 
 //establishing variables from Inputted data
-$trackedObject = $_GET['trackedObject'];
+$trackedObject = mysqli_real_escape_string($connection, $_GET['trackedObject']);
 $trackedStat = $_GET['trackedStat'];
 $format = $_GET['dataFormat'];
 $games = 0;
 $data_points = [];
 $totalGames = 0;
 $dataType = $_GET['dataType'];
-$startDate = strtotime($_GET['startDate']) * 1000;
-$endDate = strtotime($_GET['endDate']) * 1000;
+$startDate = mysqli_real_escape_string($connection, strtotime($_GET['startDate']) * 1000);
+$endDate = mysqli_real_escape_string($connection, strtotime($_GET['endDate']) * 1000);
 $dateFilter = '';
-$patch = $_GET['patch'];
-$team = $_GET['team'];
-$withPlayer = $_GET['withPlayer'];
-$againstPlayer = $_GET['againstPlayer'];
-$withHero = $_GET['withHero'];
-$againstHero = $_GET['againstHero'];
+$patch = mysqli_real_escape_string($connection, $_GET['patch']);
+$team = mysqli_real_escape_string($connection, $_GET['team']);
+$withPlayer = mysqli_real_escape_string($connection, $_GET['withPlayer']);
+$againstPlayer = mysqli_real_escape_string($connection, $_GET['againstPlayer']);
+$withHero = mysqli_real_escape_string($connection, $_GET['withHero']);
+$againstHero = mysqli_real_escape_string($connection, $_GET['againstHero']);
 $winCheck = ($_GET['wins'] === 'true');
 $lossCheck = ($_GET['losses'] === 'true');
 $radiant = ($_GET['radCheck'] === 'true');
@@ -51,6 +51,8 @@ $againstHeroCon = false;
 $againstPlayerCon = false;
 $matchArr = array();
 $factionCon = false;
+$paramArr = array();
+$paramNum = '';
 
 if ($dataType == 'faction') {
   $faction = $_GET['factionButtons'];
@@ -59,10 +61,14 @@ if ($dataType == 'faction') {
 //modify dataset by inputted data
 switch ($dataType) {
   case 'Teams':
-    $condition = ' AND Teams.name = ' . "'$trackedObject'";
+    $condition = ' AND Teams.name = ?';
+    array_push($paramArr, $trackedObject);
+    $paramNum = $paramNum . 's';
     break;
   case 'faction':
-    $condition = " AND Teams.ValveID = MatchData." . $faction . "TeamId";
+    $condition = " AND Teams.ValveID = MatchData.?TeamId";
+    array_push($paramArr, $faction);
+    $paramNum = $paramNum . 's';
     break;
   default:
     $condition = '';
@@ -70,20 +76,28 @@ switch ($dataType) {
 
 //set date range
 if ($startDate != false) {
-  $startDateFilter = " AND MatchData.start_date > $startDate";
+  $startDateFilter = " AND MatchData.start_date > ?";
+  array_push($paramArr, $startDate);
+  $paramNum = $paramNum . 's';
 }
 if ($endDate != false) {
-  $endDateFilter = "AND MatchData.start_date < $endDate";
+  $endDateFilter = "AND MatchData.start_date < ?";
+  array_push($paramArr, $endDate);
+  $paramNum = $paramNum . 's';
 }
 
 
 //filters
 if ($patch) {
-  $patchFilter = " AND MatchData.patch = '$patch'";
+  $patchFilter = " AND MatchData.patch = ?";
+  array_push($paramArr, $patch);
+  $paramNum = $paramNum . 's';
 }
 
 if ($team) {
-  $teamFilter = " AND Teams.name = '$team'";
+  $teamFilter = " AND Teams.name = ?";
+  array_push($paramArr, $team);
+  $paramNum = $paramNum . 's';
 }
 
 
@@ -94,8 +108,9 @@ foreach ($regionList as $region) {
     if ($i == 0) {
       $regionFilter = " AND (";
     }
-    $regionFilter = $regionFilter . "Leagues.Region = '$region' OR ";
-
+    $regionFilter = $regionFilter . "Leagues.Region = ? OR ";
+    array_push($paramArr, $region);
+    $paramNum = $paramNum . 's';
     $i++;
   }
 }
@@ -103,7 +118,7 @@ $regionFilter = substr_replace($regionFilter, ")", -3);
 
 
 //query database for data
-$query = "SELECT * FROM MatchData
+$statement = "SELECT * FROM MatchData
 INNER JOIN PlayerPerformances on PlayerPerformances.match_id = MatchData.match_id
 INNER JOIN Heroes on PlayerPerformances.HeroID = Heroes.HeroID
 INNER JOIN Players on PlayerPerformances.PlayerEntryID = Players.PlayerEntryID
@@ -112,7 +127,10 @@ INNER JOIN Leagues on Leagues.LeagueID = MatchData.league_id
 WHERE MatchData.has_error = 0 " .
   $condition . $patchFilter . $startDateFilter . $endDateFilter . $teamFilter . $regionFilter . "
 ORDER BY MatchData.match_id";
-$result = mysqli_query($connection, $query);
+$query = $connection->prepare($statement);
+$query->bind_param($paramNum, ...$paramArr);
+$query->execute();
+$result = $query->get_result();
 
 //filling data_points array
 $wins = 0;
@@ -124,7 +142,7 @@ $startDate = 0;
 $stat = 0;
 $gameQueue = new SplQueue();
 $radiantWin = false;
-while ($row = mysqli_fetch_array($result)) {
+foreach($result as $row){
   $rowMatchId = $row['match_id'];
   //after storing all heroes and players in an array,
   //sees the next row is from a different match so 
